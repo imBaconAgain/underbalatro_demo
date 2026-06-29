@@ -1,4 +1,4 @@
-function UNDERBALATRO.get_vanilla_joker_return(key, context, fake_card)
+function UNDERBALATRO.mod.get_vanilla_joker_return(key, context, fake_card)
     local self = fake_card
     if not self.ability.mult then
         self.ability.mult = 0
@@ -1947,7 +1947,7 @@ end
 
 -- Thorn Ring
 
-SMODS.Joker{
+--[[SMODS.Joker{
 	key = "thornring",
 	loc_txt = {
 		name = 'Thorn Ring',
@@ -2202,11 +2202,11 @@ SMODS.Joker{
                 SMODS.change_free_rerolls(3)
             end
             if not oj == 'j_chaos' then
-                SMODS.change_free_rerolls(-3)]]
+                SMODS.change_free_rerolls(-3)
             end
         end
 	end	
-}
+}]]
 
 local smods_three_fingers_ref = SMODS.four_fingers
 function SMODS.four_fingers()

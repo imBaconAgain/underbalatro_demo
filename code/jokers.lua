@@ -325,7 +325,7 @@ SMODS.Joker{
 	loc_txt = {
 		name = 'Monster Soul',
 		text = {
-			'{C:red,E:2}Self destructs{} when round ended,',
+			'{C:red,E:2}Self destructs{} when round ends,',
 			'and gives {C:money}$10{}',
 		}
 	},
@@ -406,7 +406,7 @@ SMODS.Joker{
 			end
 			card.ability.extra.soul = card.ability.extra.souls[card.ability.extra.souln]
 		end
-		return UNDERBALATRO.get_joker_return(card.ability.extra.soul,context,card,false)
+		return UNDERBALATRO.mod.get_joker_return(card.ability.extra.soul,context,card,false)
 	end	
 }
 
@@ -605,8 +605,8 @@ SMODS.Joker{
 		end
 		if card.ability.extra.jl ~= '' and card.ability.extra.jr ~= '' then
 			local retfinal = {}
-            local ret1 = UNDERBALATRO.get_joker_return(card.ability.extra.jl,context,card,table.contains(UNDERBALATRO.jokers_key,card.ability.extra.jl))
-            local ret2 = UNDERBALATRO.get_joker_return(card.ability.extra.jr,context,card,table.contains(UNDERBALATRO.jokers_key,card.ability.extra.jr))
+            local ret1 = UNDERBALATRO.mod.get_joker_return(card.ability.extra.jl,context,card,table.contains(UNDERBALATRO.mod.jokers_key,card.ability.extra.jl))
+            local ret2 = UNDERBALATRO.mod.get_joker_return(card.ability.extra.jr,context,card,table.contains(UNDERBALATRO.mod.jokers_key,card.ability.extra.jr))
             if ret1 then
                 table.insert(retfinal, ret1)
             end
@@ -1030,14 +1030,15 @@ SMODS.Joker{
 	loc_txt = {
 		name = 'Delta Rune',
 		text = {
-			'{C:mult}+50{} mult',
-            '{C:green}#2# in 10{} to break',
-            '{s:0.7}(Temporary ability)'
+			'The {C:dark_edition}prophecy{} is {C:red,E:2}not{} finished',
+			'{C:spades}1 {C:planet}2 {C:rare}3 {C:dark_edition}4 {C:green}5 {C:inactive}6 7',
+			'{C:inactive,s:0.8}Currently does {C:mult,s:0.8}+25{C:inactive,s:0.8} Mult',
+			'{C:green,s:0.8}#2# in 10{C:inactive,s:0.8} to break at the end of the round'
 		}
 	},
 	atlas = 'deltarune',
 	cost = 5,
-	rarity = 2,
+	rarity = 1,
 	soul_pos = {x=1, y=0},
 	pos = {x = 0, y = 0},
 	config = { extra = {
@@ -1053,7 +1054,7 @@ SMODS.Joker{
 	end,
 	calculate = function(self,card,context)
 		if context.joker_main then
-            return {mult = 50}
+            return {mult = 25}
         end
         if context.main_eval and context.end_of_round then
             if pseudorandom('failed') < G.GAME.probabilities.normal/10 then
@@ -1211,8 +1212,8 @@ SMODS.Joker{
 		name = 'Ralsei',
 		text = {
 			'When {C:attention}Blind{} is selected,',
-			'instantly obtain {C:attention}30%{} of the',
-			'blind requirement.',
+			'instantly set your score to', 
+			'{C:attention}30%{} of the score requirement.',
 			'{C:inactive}(Only one Ralsei works)'
 		}
 	},
@@ -1235,6 +1236,10 @@ SMODS.Joker{
 		if context.setting_blind and not context.blueprint then
 			local perc = G.GAME.blind.chips * 0.3
 			G.GAME.chips = perc
+			return {
+					message = "+"..perc.."!",
+					colour = HEX("562abd")
+				}
 		end
 		
 	end
@@ -1281,6 +1286,13 @@ SMODS.Joker{
 
 -- Dark Fountain
 
+SMODS.Atlas{
+	key = 'dfountain',
+	path = 'darkfountain.png',
+	px = 71,
+	py = 95,
+}
+
 SMODS.Joker{
 	key = "dfountain",
 	loc_txt = {
@@ -1291,12 +1303,12 @@ SMODS.Joker{
 				'{X:mult,C:white}X1.3{} Mult'
 			},
 			{
-				'Seals after {C:attention}7{} hands',
-				'{C:inactive}(Currently {C:attention}#1#{C:inactive}/7)'
+				'Seals after {C:attention}5{} hands',
+				'{C:inactive}(Currently {C:attention}#1#{C:inactive}/5)'
 			}
 		}
 	},
-	atlas = 'ph2',
+	atlas = 'dfountain',
 	rarity = 'ub_mystery',
 	pos = {x = 0, y = 0},
 	config = { extra = {
@@ -1308,7 +1320,6 @@ SMODS.Joker{
 	end,
 	blueprint_compat = false,
 	loc_vars = function(self, info_queue, card)
-		info_queue[#info_queue+1] = {key='ph', set='Other'}
 		return {vars={card.ability.extra.handss}}
     end,
 	set_badges = function(self,card,badges)
@@ -1323,7 +1334,7 @@ SMODS.Joker{
 	calculate = function(self,card,context)
 		if context.press_play then
 			card.ability.extra.handss = card.ability.extra.handss + 1
-			if card.ability.extra.handss == 7 then
+			if card.ability.extra.handss == 5 then
 				card:start_dissolve({ HEX("584896") }, nil, 1.6)
 			end
 		end
@@ -1340,17 +1351,16 @@ SMODS.Joker{
 	loc_txt = {
 		name = 'The Ruins',
 		text = {
-			'Every time you score more',
-			'than the {C:attention}60%{} of the',
-			'Blind requirement, create a',
-			'random playing card and.',
+			'Every time you score more than',
+			'{C:purple}60%{} Total Score, create a ',
+			'random enhanced playing card and', 
 			'add it to your hand',
 			'{C:inactive}(Currently #1#)'
 		}
 	},
-	atlas = 'ph2',
+	atlas = 'jatlas',
 	rarity = 'ub_mystery',
-	pos = {x = 0, y = 0},
+	pos = {x = 1, y = 1},
     cost = 5,
 	config = { extra = {
 		
@@ -1358,7 +1368,6 @@ SMODS.Joker{
     },
 	blueprint_compat = false,
 	loc_vars = function(self, info_queue, card)
-		info_queue[#info_queue+1] = {key='ph', set='Other'}
 		if G.GAME.blind then
 			if G.GAME.blind.chips * 0.6 then
 				return {vars={G.GAME.blind.chips * 0.6}}
@@ -1383,6 +1392,7 @@ SMODS.Joker{
 						local _card = create_playing_card({ front = G.P_CARDS[_suit .. _number], center = G.P_CENTERS.c_base }, G.hand,
 							nil, nil, { G.C.SECONDARY_SET.Enhanced })
 
+						_card:set_ability(SMODS.poll_enhancement({guaranteed = true,type_key = 'ruins'}))
 						G.GAME.blind:debuff_card(_card)
 						G.hand:sort()
 						card:juice_up()
@@ -1403,35 +1413,52 @@ SMODS.Joker{
 	loc_txt = {
 		name = 'Snowdin',
 		text = {
-			'{C:attention}First{} scoring card becomes',
-			'{C:planet}Frozen'
+			'{C:chips}+10{} Chips for every {C:planet}Frozen',
+            'card currently in the deck',
+            '{C:inactive}(Currently {C:chips}+#1#{C:inactive} Chips)'
 		}
 	},
-	atlas = 'ph2',
+	atlas = 'jatlas',
 	rarity = 'ub_mystery',
     cost = 5,
-	pos = {x = 0, y = 0},
+	pos = {x = 2, y = 1},
 	config = { extra = {
-		
    	},
     },
-	blueprint_compat = false,
+	blueprint_compat = true,
 	loc_vars = function(self, info_queue, card)
-		info_queue[#info_queue+1] = {key='ph', set='Other'}
 		info_queue[#info_queue+1] = G.P_CENTERS['m_ub_snowy']
+        local frozens = 0
+        if G.playing_cards then
+            for _, playing_card in ipairs(G.playing_cards) do
+                if SMODS.has_enhancement(playing_card, 'm_ub_snowy') then frozens = frozens + 1 end
+            end
+        end
+		return {vars={frozens*6}}
     end,
 	set_badges = function(self,card,badges)
 
 	end,
+	in_pool = function(self,args)
+		for _, playing_card in ipairs(G.playing_cards or {}) do
+            if SMODS.has_enhancement(playing_card, 'm_ub_snowy') then
+                return true
+            end
+        end
+        return false
+	end,
 	calculate = function(self,card,context)
-		if context.individual and context.cardarea == G.play then
-			local area = context.scoring_hand
-			if area[1] then
-				G.E_MANAGER:add_event(Event({
-					area[1]:set_ability(G.P_CENTERS["m_ub_snowy"])
-				}))	
-			end
-		end	
+		if context.joker_main then
+            local ch = 0
+            for _, playing_card in ipairs(G.playing_cards) do
+                if SMODS.has_enhancement(playing_card, 'm_ub_snowy') then 
+                    ch = ch + 10
+                end
+            end
+            return {
+                chips = ch
+            }
+        end
 	end	
 }
 
@@ -1511,7 +1538,7 @@ SMODS.Joker{
 			return {mult = card.ability.extra.mult}
 		end
 		if context.first_hand_drawn and not context.blueprint then
-			local eval = function() return G.GAME.current_round.handsplayed== 0 and notG.RESET_JIGGLES end
+			local eval = function() return G.GAME.current_round.hands_played== 0 and notG.RESET_JIGGLES end
 			juice_card_until(card,eval,true)
 		end
 		if context.before and context.main_eval and G.GAME.current_round.hands_played == 0 and #context.full_hand == 1 then
@@ -1561,10 +1588,10 @@ SMODS.Joker{
 	end,
 	calculate = function(self,card,context)
 		if context.end_of_round and context.main_eval then
-			card.ability.extra.other_joker = pseudorandom_element(UNDERBALATRO.jokers, pseudoseed('core')).key
+			card.ability.extra.other_joker = pseudorandom_element(UNDERBALATRO.mod.jokers, pseudoseed('core')).key
 		end
 
-		return UNDERBALATRO.get_joker_return(card.ability.extra.other_joker,context,card,true)
+		return UNDERBALATRO.mod.get_joker_return(card.ability.extra.other_joker,context,card,true)
 	end	
 }
 
@@ -1598,7 +1625,7 @@ SMODS.Joker{
 	end,
 	calculate = function(self,card,context)
 		if context.setting_blind and not context.blueprint and context.blind.boss then
-			SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.jokers, pseudoseed('newhome')).key}
+			SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.mod.jokers, pseudoseed('newhome')).key}
 			card:start_dissolve()
 		end
 	end	
@@ -1646,11 +1673,11 @@ SMODS.Joker{
                 card.ability.extra.paid = card.ability.extra.paid + 2
                 ease_dollars(-1)
                 if card.ability.extra.paid >= 15 then
-                    SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.consumeables,pseudoseed('temmies'))}
+                    SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.mod.consumeables,pseudoseed('temmies'))}
                 end
             else
                 if card.ability.extra.paid >= 15 then
-                    SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.consumeables,pseudoseed('temmies'))}
+                    SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.mod.consumeables,pseudoseed('temmies'))}
                 end
             end
         end
@@ -1671,9 +1698,19 @@ SMODS.Joker{
 	loc_txt = {
 		name = 'Noelle',
 		text = {
-			'{C:mult}+6{} mult for every {C:planet}Frozen',
+			{
+				'Cast {C:attention}ICESHOCK{} on the first',
+				'scoring card',
+				'{s:0.75,C:inactive}Iceshock = Frozen cards'
+			},
+			{
+				'{C:mult}+5{} when she',
+				'casts {C:attention}ICESHOCK{}',
+				'{C:inactive}(Currently {C:mult}+#1#{C:inactive} Mult)'
+			}
+			--[['{C:mult}+6{} mult for every {C:planet}Frozen',
             'card currently in the deck',
-            '{C:inactive}(Currently {C:mult}+#1#{C:inactive} mult)'
+            '{C:inactive}(Currently {C:mult}+#1#{C:inactive} mult)']]
 		}
 	},
 	atlas = 'noelle',
@@ -1684,36 +1721,36 @@ SMODS.Joker{
 		mult = 0
    	},
     },
-	in_pool = function(self,args)
+	--[[in_pool = function(self,args)
 		for _, playing_card in ipairs(G.playing_cards or {}) do
             if SMODS.has_enhancement(playing_card, 'm_ub_snowy') then
                 return true
             end
         end
         return false
-	end,
+	end,]]
 	blueprint_compat = true,
 	loc_vars = function(self, info_queue, card)
         info_queue[#info_queue+1] = G.P_CENTERS['m_ub_snowy']
-        local frozens = 0
-        if G.playing_cards then
+        --local frozens = 0
+        --[[if G.playing_cards then
             for _, playing_card in ipairs(G.playing_cards) do
                 if SMODS.has_enhancement(playing_card, 'm_ub_snowy') then frozens = frozens + 1 end
             end
-        end
-		return {vars={frozens*6}}
+        end]]
+		return {vars={card.ability.extra.mult}}
     end,
 	set_badges = function(self,card,badges)
         badges[#badges+1] = create_badge(localize('k_prophecy'), HEX('8062d9'), G.C.WHITE, 0.8)
 	end,
 	calculate = function(self,card,context)
+		if context.main_eval and context.before then
+			G.E_MANAGER:add_event(Event({
+					context.full_hand[1]:set_ability(G.P_CENTERS["m_ub_snowy"])
+				}))
+			card.ability.extra.mult = card.ability.extra.mult + 5
+		end
 		if context.joker_main then
-            card.ability.extra.mult = 0
-            for _, playing_card in ipairs(G.playing_cards) do
-                if SMODS.has_enhancement(playing_card, 'm_ub_snowy') then 
-                    card.ability.extra.mult = card.ability.extra.mult + 6
-                end
-            end
             return {
                 mult = card.ability.extra.mult
             }
@@ -2059,7 +2096,7 @@ SMODS.Joker{
 			end
             if other_joker and other_joker ~= self then
                 other_joker:start_dissolve()
-                SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.jokers, pseudoseed('chara')).key, edition = 'e_negative'}
+                SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.mod.jokers, pseudoseed('chara')).key, edition = 'e_negative'}
             end
         end
 	end	
@@ -2217,7 +2254,7 @@ SMODS.Joker{
 	},
 	atlas = 'ph2',
 	cost = 3,
-	rarity = 1,
+	rarity = 2,
 	pos = {x = 0, y = 0},
 	config = { extra = {
         
@@ -2451,6 +2488,187 @@ SMODS.Joker{
 	end	
 }
 
+-- Mad Dummy
+
+SMODS.Joker{
+	key = "mdummy",
+	loc_txt = {
+		name = 'Mad Dummy',
+		text = {
+			'{C:mult}+3{} Mult when destroyed',
+            '{C:inactive}(Currently {C:mult}+#1#{C:inactive} Mult)',
+			'{s:0.75,C:inactive}Foolish. Foolish! FOOLISH!'
+		}
+	},
+	atlas = 'jatlas',
+	cost = 6,
+	rarity = 1,
+	pos = {x = 3, y = 0},
+	config = { extra = {
+		mult = 0
+   	},
+    },
+	blueprint_compat = true,
+	loc_vars = function(self, info_queue, card)
+		return {vars={card.ability.extra.mult}}
+    end,
+	set_badges = function(self,card,badges)
+
+	end,
+	add_to_deck = function(self,card, from_debuff)
+		if from_debuff == false then 
+			card:set_sell_value()
+		end
+	end,
+	calculate = function(self,card,context)
+		if context.joker_type_destroyed and context.card == card and not context.blueprint then
+			local _card = SMODS.add_card({key = 'j_ub_mdummy'})
+			_card.ability.extra.mult = card.ability.extra.mult + 3
+
+		end
+		if context.joker_main then
+            return {mult = card.ability.extra.mult}
+        end
+	end,
+	eternal_compat = false
+}
+
+-- Flowery
+
+SMODS.Joker{
+	key = "flowery",
+	loc_txt = {
+		name = 'Flowery',
+		text = {
+			'Create a {C:ub_rainbow}random{} flower',
+			'item every {C:attention}Ante'
+		}
+	},
+	atlas = 'jatlas',
+	cost = 7,
+	rarity = 2,
+	pos = {x = 2, y = 0},
+	config = { extra = {
+
+   	},
+    },
+	blueprint_compat = false,
+	loc_vars = function(self, info_queue, card)
+		info_queue[#info_queue+1] = {key='ph', set='Other'}
+		return {vars={}}
+    end,
+	set_badges = function(self,card,badges)
+
+	end,
+	calculate = function(self,card,context)
+		if context.end_of_round and context.game_over == false and context.main_eval and not context.blueprint and G.GAME.blind.boss then
+			G.GAME.consumeable_buffer = G.GAME.consumeable_buffer + 1
+            G.E_MANAGER:add_event(Event({
+                func = (function()
+                    G.E_MANAGER:add_event(Event({
+                        func = function()
+                            SMODS.add_card{key = pseudorandom_element(UNDERBALATRO.mod.flower_items, pseudoseed("flowery"))}
+                            G.GAME.consumeable_buffer = 0
+                            return true
+                        end
+                    }))
+                    SMODS.calculate_effect({ message = '+1 FLOWER ITEM', colour = G.C.PURPLE },
+                        context.blueprint_card or card)
+                    return true
+                end)
+            }))
+            return nil, true -- This is for Joker retrigger purposes
+		end
+	end,
+}
+
+-- Jackenstein
+
+SMODS.Joker{
+	key = "jackenstein",
+	loc_txt = {
+		name = 'Jackenstein',
+		text = {
+				'{X:mult,C:white}X#1#{} Mult',
+				'{X:mult,C:white}-X0.1{} Mult every hand',
+				'Resets every blind',
+				'{s:0.75,C:inactive}YOUR TAKING TOO LONG'
+		}
+	},
+	atlas = 'jatlas',
+	rarity = 2,
+	pos = {x = 2, y = 0},
+	config = { extra = {
+		xmult = 1.3
+   	},
+    },
+	in_pool = function(self,args)
+		return false
+	end,
+	blueprint_compat = false,
+	loc_vars = function(self, info_queue, card)
+		info_queue[#info_queue+1] = {key='ph', set='Other'}
+		return {vars={card.ability.extra.xmult}}
+    end,
+	set_badges = function(self,card,badges)
+
+	end,
+	calculate = function(self,card,context)
+		if context.setting_blind then
+			card.ability.extra.xmult = 1+(G.GAME.current_round.hands_left/10)
+		end
+		if context.joker_main then
+			local multi = card.ability.extra.xmult
+			card.ability.extra.xmult = card.ability.extra.xmult - 0.1
+			return {xmult = multi}
+		end
+	end	
+}
+
+-- Jackenstein
+
+SMODS.Joker{
+	key = "jackenstein",
+	loc_txt = {
+		name = 'Jackenstein',
+		text = {
+				'{X:mult,C:white}X#1#{} Mult',
+				'{X:mult,C:white}-X0.1{} Mult every hand',
+				'Resets every blind',
+				'{s:0.75,C:inactive}YOUR TAKING TOO LONG'
+		}
+	},
+	atlas = 'jatlas',
+	rarity = 2,
+	pos = {x = 2, y = 0},
+	config = { extra = {
+		xmult = 1.3
+   	},
+    },
+	in_pool = function(self,args)
+		return false
+	end,
+	blueprint_compat = false,
+	loc_vars = function(self, info_queue, card)
+		info_queue[#info_queue+1] = {key='ph', set='Other'}
+		return {vars={card.ability.extra.xmult}}
+    end,
+	set_badges = function(self,card,badges)
+
+	end,
+	calculate = function(self,card,context)
+		if context.setting_blind then
+			card.ability.extra.xmult = 1+(G.GAME.hands/10)
+		end
+		if context.press_play then
+			card.ability.extra.xmult = card.ability.extra.xmult - 0.1
+		end
+		if context.joker_main then
+			return {xmult = card.ability.extra.xmult}
+		end
+	end	
+}
+
 --[[if context.ub_destroyedcard == "j_ub_monster" then
 			card.ability.extra.mult = card.ability.extra.mult + 6
 				return { 
@@ -2461,4 +2679,85 @@ SMODS.Joker{
 		if context.joker_main then
 			return {mult = card.ability.extra.mult}
 		end
-		--]]
+--]]
+
+-- OLD FLOWERY
+
+--[[
+can_use = function(self,card)
+		return true
+	end,
+	use = function(self,card,area)
+		if card.ability.extra.flower == "Aqua" then
+			card.ability.extra.flower = "Green"
+			card.ability.extra.abil = "When blind is selected, add 10% of the total score"
+		elseif card.ability.extra.flower == "Green" then
+			card.ability.extra.flower = "Orange"
+			card.ability.extra.abil = "+10 Mult"
+		elseif card.ability.extra.flower == "Orange" then
+			card.ability.extra.flower = "Seth"
+			card.ability.extra.abil = "Copy the ability of the joker to the left"
+		elseif card.ability.extra.flower == "Seth" then
+			card.ability.extra.flower = "Yellow"
+			card.ability.extra.abil = "If there is a scoring Ace, +100 Chips"
+		elseif card.ability.extra.flower == "Yellow" then
+			card.ability.extra.flower = "Blue"
+			card.ability.extra.abil = "1 in 3 chance to give Echo flower seal to the first scoring card"
+		elseif card.ability.extra.flower == "Blue" then
+			card.ability.extra.flower = "Aqua"
+			card.ability.extra.abil = "First hand played gives +200 Chips"
+		end
+	end,
+	if context.setting_blind then
+			if card.ability.extra.flower == "Green" then 
+				local e = G.GAME.blind.chips * 0.1
+				G.GAME.chips = G.GAME.chips + e
+				return {
+					message = "+"..e.."!",
+					colour = HEX("562abd")
+				}
+			end
+		end
+		if context.joker_main then
+			if card.ability.extra.flower == "Orange" then
+				return {mult = 10}
+			elseif card.ability.extra.flower == "Yellow" then
+				local truth = false
+				for _, i in ipairs(context.full_hand) do
+					local id = i:get_id()
+					if id == 14 then
+						truth = true
+					end
+				end
+				if truth == true then return {chips = 100} end
+			elseif card.ability.extra.flower == "Aqua" then
+				if G.GAME.current_round.hands_played == 0 then
+					return {chips = 200}
+				end
+			end
+		end
+		if card.ability.extra.flower == "Seth" then
+			local other_joker = nil
+			for i = 1, #G.jokers.cards do
+				if G.jokers.cards[i] == card then other_joker = G.jokers.cards[i-1] end
+			end
+			local ret = SMODS.blueprint_effect(card, other_joker, context)
+			if ret then
+				ret.colour = G.C.BLUE
+			end
+			return ret
+		end
+		if context.individual and context.cardarea == G.play then
+			if card.ability.extra.flower == "Blue" and pseudorandom("blue") < G.GAME.probabilities.normal/3 then
+				local area = context.scoring_hand
+				if area[1] then
+					G.E_MANAGER:add_event(Event({
+						func = function()
+							area[1]:set_seal('ub_echo_flower')
+							return true
+						end
+					}))	
+				end
+			end
+		end	
+	]]
