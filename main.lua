@@ -3,7 +3,9 @@
 
 ------------------------------OTHERS--------------------------------------
 
-UNDERBALATRO = SMODS.current_mod
+UNDERBALATRO = UNDERBALATRO or {}
+
+UNDERBALATRO.mod = SMODS.current_mod
 
 assert(SMODS.load_file('./code/backs.lua'))()
 assert(SMODS.load_file('./code/consumeables.lua'))()
@@ -16,7 +18,7 @@ assert(SMODS.load_file('./code/bigfunctions.lua'))()
 
 assert(SMODS.load_file('./code/compats/Partner.lua'))()
 
-SMODS.current_mod.optional_features = function()
+UNDERBALATRO.mod.optional_features = function()
     return {
         quantum_enhancements = true
     }
@@ -68,6 +70,13 @@ SMODS.Atlas{
 	frames = 21,
 }
 
+SMODS.Atlas{
+	key = 'newph',
+	path = 'item_placeholder.png',
+	px = 77,
+	py = 101
+}
+
 G.localization.descriptions.Other['ph'] = {
     name = 'Placeholder',
     text = {
@@ -111,7 +120,7 @@ SMODS.Gradient{
 	interpolation = 'linear'
 }
 
-function UNDERBALATRO.create_fake_joker(ref, key, reason, juicecard)
+function UNDERBALATRO.mod.create_fake_joker(ref, key, reason, juicecard)
 	local center = G.P_CENTERS[key]
 	local ability
 	local cardformsg = juicecard or ref
@@ -194,7 +203,7 @@ function UNDERBALATRO.get_joker_return(key, context, card, isvanilla, juicecard)
     if center then
         card.ability.savedvalues = card.ability.savedvalues or {}
         card.ability.savedvalues[key] = card.ability.savedvalues[key] or copy_table(center.config)
-        local fake_card = UNDERBALATRO.create_fake_joker(card, key, "calculate", juicecard)
+        local fake_card = UNDERBALATRO.mod.create_fake_joker(card, key, "calculate", juicecard)
         if card.config.center.key == "j_soe_allinone" then
             card.ability.extra.currentjoker = center
         end
@@ -202,7 +211,7 @@ function UNDERBALATRO.get_joker_return(key, context, card, isvanilla, juicecard)
             return center:calculate(fake_card, context), fake_card
         end
         if isvanilla then
-            return UNDERBALATRO.get_vanilla_joker_return(key, context, fake_card), fake_card
+            return UNDERBALATRO.mod.get_vanilla_joker_return(key, context, fake_card), fake_card
         end
     end
 end
@@ -218,24 +227,24 @@ function table.contains(table, element)
     end
 end
 
-UNDERBALATRO.jokers = {}
+UNDERBALATRO.mod.jokers = {}
 for k,v in pairs(G.P_CENTERS) do
 	if v.set == "Joker" then
-		table.insert(UNDERBALATRO.jokers,v)
+		table.insert(UNDERBALATRO.mod.jokers,v)
 	end
 end
 
-UNDERBALATRO.jokers_key = {}
+UNDERBALATRO.mod.jokers_key = {}
 for k, v in pairs(G.P_CENTERS) do
 	if v.set == 'Joker' then
-		table.insert(UNDERBALATRO.jokers_key,v.key)
+		table.insert(UNDERBALATRO.mod.jokers_key,v.key)
 	end
 end
 
-UNDERBALATRO.consumeables = {}
+UNDERBALATRO.mod.consumeables = {}
 for k,v in pairs(G.P_CENTERS) do
 	if v.set == "Consumable" then
-		table.insert(UNDERBALATRO.consumeables,v)
+		table.insert(UNDERBALATRO.mod.consumeables,v)
 	end
 end
 
@@ -266,7 +275,7 @@ end
 	'hotland',
 	'core'
 }]]
-UNDERBALATRO.tarots = {
+UNDERBALATRO.mod.tarots = {
 	'fool',
 	'magician',
 	'high_priestess',
@@ -289,6 +298,14 @@ UNDERBALATRO.tarots = {
 	'sun',
 	'judgement',
 	'world'
+}
+UNDERBALATRO.mod.flower_items = {
+	"c_ub_sethspecs",
+	"c_ub_blueshoes",
+	"c_ub_aquaknife",
+	"c_ub_yellowhat",
+	"c_ub_oglove",
+	"c_ub_greenapron"
 }
 
 --Hooking!
@@ -316,7 +333,7 @@ function Card:can_sell_card(context)
 	return g
 end
 
-local use_and_sell_buttonsref = G.UIDEF.use_and_sell_buttons
+--[[local use_and_sell_buttonsref = G.UIDEF.use_and_sell_buttons
 function G.UIDEF.use_and_sell_buttons(card)
 	local retval = use_and_sell_buttonsref(card)
 	if card.area and card.area.config.type == 'joker' and card.ability.set == 'Joker' and card.ability.deal then
@@ -342,7 +359,7 @@ function G.UIDEF.use_and_sell_buttons(card)
 	end
 
 	return retval
-end
+end]]
 
 local oldsetcost = Card.set_cost
 function Card:set_cost()
@@ -351,6 +368,15 @@ function Card:set_cost()
 		self.sell_cost = self.ability.extra.price 
 	elseif self.config.center.key == 'j_ub_nubert' then
 		self.sell_cost = -9999999
+	end
+	return g
+end
+
+local oldsetsellvalue = Card.set_sell_value
+function Card:set_sell_value()
+	local g = oldsetsellvalue(self)
+	if self.config.center.key == 'j_ub_mdummy' then 
+		self.sell_cost = 1
 	end
 	return g
 end
