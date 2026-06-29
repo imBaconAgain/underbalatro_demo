@@ -1,0 +1,13 @@
+{
+	"id": "underbalatro",
+	"name": "Underbalatro",
+	"display_name": "Underbalatro",
+	"author": ["@imbacon."],
+	"description": "Mod is currently unfinished. This is an early demo of the mod. This mod includes content related to Undertale and Deltarune, from jokers, to items! If you have any suggestion, please tell me sending me a message through Discord! This mod may contain spoilers, you've been warned!",
+	"prefix": "ub",
+	"main_file": "main.lua",
+	"priority": 0,
+	"badge_colour": "FC0050",
+	"badge_text_colour": "000000",
+	"version": "0.2.0a"
+} 
