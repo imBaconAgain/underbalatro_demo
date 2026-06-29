@@ -41,23 +41,23 @@ SMODS.Enhancement{
 	loc_txt = {
 		name = "Frozen",
 		text = {
-			'{X:chips,C:white}X1.2{} chips for',
-			'every other scoring',
-			'{C:planet}Frozen{} card'
+			'{X:chips,C:white}X1.3{} Chips for',
+			'every other {C:planet}Frozen{}',
+			'card held in hand'
 		}
 	},
 	config = {extra = {
 
 	}
 	},
-    pos = {x=4,y=1},
+    pos = {x=6,y=1},
 	atlas = "spritesheet",
 	calculate = function(self,card,context)
 		if context.main_scoring and context.cardarea == G.play then
 			local snowy_xchips = 1
-			for _,i in ipairs(context.scoring_hand) do
-				if SMODS.has_enhancement(i, 'm_ub_snowy') and i ~= card then
-					snowy_xchips = snowy_xchips +0.2
+			for _,i in ipairs(G.hand.cards) do
+				if SMODS.has_enhancement(i, 'm_ub_snowy') then
+					snowy_xchips = snowy_xchips +0.3
 				end
 			end
 			return {xchips = snowy_xchips}

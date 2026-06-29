@@ -8,7 +8,7 @@ SMODS.ConsumableType{
 		name = "ITEM",
 		collection = "ITEM",
 	},
-	shop_rate = 1
+	shop_rate = 2
 }
 
 -- Bullet
@@ -344,8 +344,8 @@ SMODS.Consumable{
 	loc_txt = {
 		name = 'Butterscotch Pie',
 		text = {
-			'Instantly obtain {C:attention}90%{}',
-            'of the Blind requirement.'
+			'Instantly obtain {C:purple}80%{}',
+            'of the Total Score.'
 		}
 	},
 	atlas = 'ph',
@@ -368,7 +368,7 @@ SMODS.Consumable{
 		
 	end,
 	use = function(self,card,area,copier)
-		local perc = G.GAME.blind.chips * 0.9
+		local perc = G.GAME.blind.chips * 0.8
         G.GAME.chips = G.GAME.chips + perc
         G.E_MANAGER:add_event(Event({
             trigger = 'after',
@@ -379,6 +379,10 @@ SMODS.Consumable{
                 return true
             end
         }))
+		return {
+				message = "+"..perc.." Score!",
+				colour = G.C.PURPLE
+			}
 	end,
 }
 
@@ -390,10 +394,9 @@ SMODS.Consumable{
 	loc_txt = {
 		name = 'Instant Noodles',
 		text = {
-			'Instantly obtain {C:attention}50%{}',
-            'of the Blind requirement',
-            'during Boss blind, and',
-            '{C:attention}10%{} otherwise'
+			'Instantly obtain {C:purple}25%{}',
+            'of the Total Score',
+			'Obtain {C:purple}50%{} during Boss blind',
 		}
 	},
 	atlas = 'ph',
@@ -415,10 +418,10 @@ SMODS.Consumable{
 	use = function(self,card,area,copier)
         local perc = 0
 		if G.GAME.blind.boss then
-            perc = G.GAME.blind.chips * 0.5
+            perc = G.GAME.blind.chips * 0.25
             G.GAME.chips = G.GAME.chips + perc
         else
-            perc = G.GAME.blind.chips * 0.1
+            perc = G.GAME.blind.chips * 0.5
             G.GAME.chips = G.GAME.chips + perc
         end
         G.E_MANAGER:add_event(Event({
@@ -430,6 +433,11 @@ SMODS.Consumable{
                 return true
             end
         }))
+
+		return {
+				message = "+"..perc.." Score!",
+				colour = G.C.PURPLE
+			}
 	end,
 }
 
@@ -490,7 +498,7 @@ SMODS.Consumable{
             '{C:attention}Ante'
 		}
 	},
-	atlas = 'ph',
+	atlas = 'newph',
 	cost = 4,
 	pos = {x = 0, y = 0},
 	config = {extra = {
@@ -537,7 +545,7 @@ SMODS.Consumable{
             'into {C:attention}Wild Card'
 		}
 	},
-	atlas = 'ph',
+	atlas = 'newph',
 	cost = 2,
 	pos = {x = 0, y = 0},
 	config = {extra = {
@@ -642,7 +650,7 @@ SMODS.Consumable{
             '{C:gold}[$#3#]{} every hand'
 		}
 	},
-	atlas = 'ph',
+	atlas = 'newph',
 	cost = 4,
 	pos = {x = 0, y = 0},
 	config = {extra = {
@@ -694,7 +702,7 @@ SMODS.Consumable{
             '{C:attention}1{} selected card'
 		}
 	},
-	atlas = 'ph',
+	atlas = 'newph',
 	cost = 5,
 	pos = {x = 0, y = 0},
 	config = {extra = {
@@ -754,7 +762,7 @@ SMODS.Consumable{
             '{C:inactive,s:0.6}In order to attain this ITEM, you became much stronger'
 		}
 	},
-	atlas = 'ph',
+	atlas = 'newph',
 	cost = 3,
 	pos = {x = 0, y = 0},
 	config = {extra = {
@@ -797,6 +805,297 @@ SMODS.Consumable{
                 delay = 0.1,
                 func = function()
                     G.hand.highlighted[1]:set_ability(SMODS.poll_enhancement({guaranteed = true,type_key = 'justiceaxe'}))
+                    return true
+                end
+            }))
+        end
+        for i = 1, #G.hand.highlighted do
+            local percent = 0.85 + (i - 0.999) / (#G.hand.highlighted - 0.998) * 0.3
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.15,
+                func = function()
+                    G.hand.highlighted[i]:flip()
+                    play_sound('tarot2', percent, 0.6)
+                    G.hand.highlighted[i]:juice_up(0.3, 0.3)
+                    return true
+                end
+            }))
+        end
+        G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.2,
+            func = function()
+                G.hand:unhighlight_all()
+                return true
+            end
+        }))
+        delay(0.5)
+    end
+}
+
+-- AquaKnife
+
+SMODS.Atlas{
+	key = 'ak',
+	path = 'aquaknife.png',
+	px = 77,
+	py = 101
+}
+
+SMODS.Consumable{
+	key = "aquaknife",
+	set = "items",
+	loc_txt = {
+		name = 'Aqua Knife',
+		text = {
+			'{C:green}#1# in 4{} chance for',
+			'{X:purple,C:white}X1.5{} Score'
+		}
+	},
+	atlas = 'ak',
+	cost = 5,
+	pos = {x = 0, y = 0},
+	config = {extra = {
+		
+	}
+	},
+	can_use = function(self,card)
+        return G.GAME.blind.in_blind
+	end,
+	in_pool = function(self,args)
+		return false
+	end,
+	loc_vars = function(self,info_queue,card)
+        return {vars={(G.GAME and G.GAME.probabilities.normal or 1)}}
+	end,
+	use = function(self,card,area,copier)
+        if pseudorandom('aqua') < G.GAME.probabilities.normal/4 then
+            G.GAME.chips = G.GAME.chips * 1.5
+			return {
+                message = 'Success!',
+                colour = G.C.attention,
+                G.E_MANAGER:add_event(Event({
+                    trigger = 'after',
+                    delay = 0.4,
+                    func = function()
+                        play_sound('tarot1')
+                        card:juice_up(0.3, 0.5)
+                        return true
+                    end
+                }))
+            }
+        end
+        return {
+            message = 'Fail',
+            colour = G.C.attention,
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.4,
+                func = function()
+                    play_sound('tarot1')
+                    card:juice_up(0.3, 0.5)
+                    return true
+                end
+            }))
+        }
+    end
+}
+
+-- SethSpecs
+
+SMODS.Consumable{
+	key = "sethspecs",
+	set = "items",
+	loc_txt = {
+		name = 'Seth Specs',
+		text = {
+			'{C:purple}+10%{} Total Score'
+		}
+	},
+	atlas = 'newph',
+	cost = 3,
+	pos = {x = 0, y = 0},
+	config = {extra = {
+		
+	}
+	},
+	in_pool = function(self,args)
+		return false
+	end,
+	can_use = function(self,card)
+        return G.GAME.blind.in_blind
+	end,
+	loc_vars = function(self,info_queue,card)
+        return {vars={}}
+	end,
+	use = function(self,card,area,copier)
+		local perc = G.GAME.blind.chips * .1
+        G.GAME.chips = G.GAME.chips + perc
+		return {
+				message = "+"..perc.." Score!",
+				colour = G.C.PURPLE
+			}
+    end
+}
+
+-- BlueShoes
+
+SMODS.Consumable{
+	key = "blueshoes",
+	set = "items",
+	loc_txt = {
+		name = 'Blue Shoes',
+		text = {
+			'{C:blue}+1{} hand'
+		}
+	},
+	atlas = 'newph',
+	cost = 7,
+	pos = {x = 0, y = 0},
+	config = {extra = {
+		
+	}
+	},
+	in_pool = function(self,args)
+		return false
+	end,
+	can_use = function(self,card)
+        return G.GAME.blind.in_blind
+	end,
+	loc_vars = function(self,info_queue,card)
+        return {vars={}}
+	end,
+	use = function(self,card,area,copier)
+		ease_hands_played(1)
+    end
+}
+
+-- YellowHat
+
+SMODS.Consumable{
+	key = "yellowhat",
+	set = "items",
+	loc_txt = {
+		name = 'Yellow Hat',
+		text = {
+			'{C:blue}+1{} hand',
+			'{C:inactive}temporal ability'
+		}
+	},
+	atlas = 'newph',
+	cost = 7,
+	pos = {x = 0, y = 0},
+	config = {extra = {
+		
+	}
+	},
+	in_pool = function(self,args)
+		return false
+	end,
+	can_use = function(self,card)
+        return G.GAME.blind.in_blind
+	end,
+	loc_vars = function(self,info_queue,card)
+        return {vars={(G.GAME and G.GAME.probabilities.normal or 1)}}
+	end,
+	use = function(self,card,area,copier)
+		ease_hands_played(1)
+    end
+}
+
+-- o.glove
+
+SMODS.Consumable{
+	key = "oglove",
+	set = "items",
+	loc_txt = {
+		name = 'O. Glove',
+		text = {
+			'{C:red}+1{} discard'
+		}
+	},
+	atlas = 'newph',
+	cost = 6,
+	pos = {x = 0, y = 0},
+	config = {extra = {
+		
+	}
+	},
+	in_pool = function(self,args)
+		return false
+	end,
+	can_use = function(self,card)
+        return G.GAME.blind.in_blind
+	end,
+	loc_vars = function(self,info_queue,card)
+        return {vars={}}
+	end,
+	use = function(self,card,area,copier)
+		ease_discard(1)
+    end
+}
+
+
+-- GreenApron
+
+SMODS.Consumable{
+	key = "greenapron",
+	set = "items",
+	loc_txt = {
+		name = 'Green Apron',
+		text = {
+			'Gives {C:attention}1{} selected card',
+			'the {C:attention}Defend{} Seal'
+		}
+	},
+	atlas = 'newph',
+	cost = 6,
+	pos = {x = 0, y = 0},
+	config = {extra = {
+		
+	}
+	},
+	can_use = function(self,card)
+        return #G.hand.highlighted == 1
+	end,
+	in_pool = function(self,args)
+		return false
+	end,
+	loc_vars = function(self,info_queue,card)
+		info_queue[#info_queue+1] = G.P_CENTERS['ub_defend']
+        return {vars={}}
+	end,
+	use = function(self,card,area,copier)
+		G.E_MANAGER:add_event(Event({
+            trigger = 'after',
+            delay = 0.4,
+            func = function()
+                play_sound('tarot1')
+                card:juice_up(0.3, 0.5)
+                return true
+            end
+        }))
+        for i = 1, #G.hand.highlighted do
+            local percent = 1.15 - (i - 0.999) / (#G.hand.highlighted - 0.998) * 0.3
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.15,
+                func = function()
+                    G.hand.highlighted[i]:flip()
+                    play_sound('card1', percent)
+                    G.hand.highlighted[i]:juice_up(0.3, 0.3)
+                    return true
+                end
+            }))
+        end
+        delay(0.2)
+        for i = 1, #G.hand.highlighted do
+            G.E_MANAGER:add_event(Event({
+                trigger = 'after',
+                delay = 0.1,
+                func = function()
+                    G.hand.highlighted[i]:set_seal('ub_defend')
                     return true
                 end
             }))
