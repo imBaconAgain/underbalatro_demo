@@ -27,3 +27,37 @@ SMODS.Seal{
 		end
 	end
 }
+
+-- Defend
+
+SMODS.Atlas{
+	key = 'defend',
+	path = 'defend.png',
+	px = 71,
+	py = 95
+}
+
+
+SMODS.Seal{
+	key = 'defend',
+	loc_txt = {
+		name = 'Defend',
+		text = {
+			'{C:purple}+50%{} Score'
+		},
+		label = 'Defend'
+	},
+	atlas = 'defend',
+	badge_colour = G.C.PURPLE,
+	sound = { sound = 'gold_seal', per = 1.2, vol = 0.4 },
+	calculate = function(self,card,context)
+		if context.main_scoring then
+			local perc = G.GAME.chips * 0.5
+			G.GAME.chips = G.GAME.chips +perc
+			return {
+				message = "+"..perc.." Score!",
+				colour = G.C.PURPLE
+			}
+		end
+	end
+}
